@@ -1,39 +1,55 @@
-require("dotenv").config();
+import dotenv from dotenv
+dotenv.config({path: `../../.env.${process.env.NODE_ENV}`})
+let accessToken;
+const CLIENT_ID = process.env.CLIENT_ID;
+const redirectURL = "http://localhost:3000/";
 
-class Spotify {
-  constructor() {
-    this.CLIENT_ID = process.env.CLIENT_ID;
-    this.redirectURL = "http://localhost:3000/";
-    this.accessToken = "";
-    this.getAccessToken = this.getAccessToken.bind(this);
-  }
-
-  getAccessToken = () => {
-    if (this.accessToken) {
-      return this.accessToken;
+const Spotify = {
+  getAccessToken() {
+    if (accessToken) {
+      return accessToken;
     }
     const URL = window.location.href;
-    this.accessToken = URL.match(/access_token=([^&]*)/);
-    const expiresIn = URL.match(/expires_in=([^&]*)/);
-    window.setTimeout(() => (this.accessToken = ""), expiresIn * 1000);
-    window.history.pushState("Access Token", null, "/");
-    window.location = `https://accounts.spotify.com/authorize?client_id=${this.CLIENT_ID}&response_type=token&scope=playlist-modify-public&redirect_uri=${this.redirectURL}`;
-  };
+    const accessTokenMatch = URL.match(/access_token=([^&]*)/);
+    const expiresInMatch = URL.match(/expires_in=([^&]*)/);
 
-  search = async (term) => {
-    this.getAccessToken();
+    if (accessTokenMatch && expiresInMatch) {
+      accessToken = accessTokenMatch[1];
+      const expiresIn = Number(expiresInMatch[1]);
+      window.setTimeout(() => (accessToken = ""), expiresIn * 1000);
+      window.history.pushState("Access Token", null, "/");
+      return accessToken;
+    } else {
+      window.location = `https://accounts.spotify.com/authorize?client_id=${this.CLIENT_ID}&response_type=token&scope=playlist-modify-public&redirect_uri=${this.redirectURL}`;
+    }
+  },
+
+  async search(term) {
+    const accessToken = Spotify.getAccessToken();
     const response = await fetch(
       `https://api.spotify.com/v1/search?type=track&q=${term}`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
-    const data = response.json();
-    if (!data) {
+    const data = await response.json();
+    if (!data.tracks) {
       return [];
     }
-    return data;
-  };
-}
+    return data.tracks.items.map((track) => ({
+      id: track.id,
+      name: track.name,
+      artist: track.artists[0].name,
+      album: track.album.name,
+      uri: track.uri,
+    }));
+  },
 
-module.exports = Spotify;
+  savePlaylist(name, trackURIs) {
+    if (!(name && trackURIs)) {
+      return;
+    }
+  },
+};
+
+export default Spotify;
