@@ -3,7 +3,7 @@ class Spotify {
     this.accessToken = "";
     this.CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
     this.URL = window.location.href;
-    this.redirectURL = "http://localhost:3001";
+    this.redirectURL = "http://localhost:3000";
   }
 
   getAccessToken() {
