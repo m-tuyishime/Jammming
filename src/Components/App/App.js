@@ -24,6 +24,10 @@ class App extends React.Component {
     this.search = this.search.bind(this);
   }
 
+  componentDidMount() {
+    this.spotify.getAccessToken();
+  }
+
   addTrack(track) {
     const isNew = !this.state.playlistTracks.some(
       (savedTrack) => savedTrack.id === track.id
@@ -52,7 +56,8 @@ class App extends React.Component {
     const trackURIs = this.state.playlistTracks.map(
       (savedTrack) => savedTrack.uri
     );
-    if (this.trackURIs) {
+
+    if (trackURIs[0]) {
       await this.spotify.savePlaylist(this.state.playlistName, trackURIs);
       this.setState({
         playlistName: "New Playlist",

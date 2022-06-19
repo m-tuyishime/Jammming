@@ -10,7 +10,6 @@ class Spotify {
     if (this.accessToken) {
       return this.accessToken;
     }
-    console.log(window.location.href);
     const accessTokenMatch = this.URL.match(/access_token=([^&]*)/);
     const expiresInMatch = this.URL.match(/expires_in=([^&]*)/);
 
@@ -27,7 +26,6 @@ class Spotify {
   }
 
   async search(term) {
-    this.getAccessToken();
     const response = await fetch(
       `https://api.spotify.com/v1/search?type=track&q=${term}`,
       {
@@ -52,7 +50,6 @@ class Spotify {
       return;
     }
 
-    this.getAccessToken();
     let userId;
 
     let response = await fetch("https://api.spotify.com/v1/me", {
