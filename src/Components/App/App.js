@@ -64,8 +64,7 @@ class App extends React.Component {
   async search(term) {
     if (term) {
       const searchResults = await this.spotify.search(term);
-      console.log(searchResults);
-      this.setState({ searchResults: searchResults });
+      this.setState({ searchResults });
     }
   }
 
