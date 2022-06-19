@@ -11,15 +11,12 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      playlistName: "playlist name",
-      playlistTracks: [
-        { name: "too hard", artist: "Gunna", album: "cold af", id: 5 },
-        { name: "who want smoke", artist: "savage", album: "hoodlooms", id: 8 },
-      ],
-      searchResults: [
-        { name: "bobyjunky1", artist: "fyomoma", album: "drunkenpig", id: 1 },
-      ],
+      playlistName: "New Playlist",
+      playlistTracks: [],
+      searchResults: [],
     };
+    this.spotify = new Spotify();
+
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
     this.updatePlaylistName = this.updatePlaylistName.bind(this);
@@ -51,15 +48,25 @@ class App extends React.Component {
     this.setState({ playlistName: name });
   }
 
-  savePlaylist() {
+  async savePlaylist() {
     const trackURIs = this.state.playlistTracks.map(
       (savedTrack) => savedTrack.uri
     );
+    if (this.trackURIs) {
+      await this.spotify.savePlaylist(this.state.playlistName, trackURIs);
+      this.setState({
+        playlistName: "New Playlist",
+        playlistTracks: [],
+      });
+    }
   }
 
   async search(term) {
-    const searchResults = await Spotify.search(term);
-    this.setState({ searchResults: searchResults });
+    if (term) {
+      const searchResults = await this.spotify.search(term);
+      console.log(searchResults);
+      this.setState({ searchResults: searchResults });
+    }
   }
 
   render() {
